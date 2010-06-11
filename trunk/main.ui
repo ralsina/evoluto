@@ -111,7 +111,7 @@
        <item>
         <widget class="QLabel" name="model_label">
          <property name="text">
-          <string>model_label</string>
+          <string>None</string>
          </property>
         </widget>
        </item>
@@ -144,7 +144,7 @@
      <item>
       <widget class="QLabel" name="generation_label">
        <property name="text">
-        <string>generation_label</string>
+        <string>0</string>
        </property>
       </widget>
      </item>
