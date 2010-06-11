@@ -58,15 +58,18 @@ class Main(QtGui.QDialog):
             return
         self.mfname = mfname
         mfname = "models.%s"%(mfname.split(os.sep)[-1][:-3])
-        model=__import__(mfname, fromlist="Model")
-        self.model = model.Model(self.pic)
+        self.model_mod=__import__(mfname, fromlist="Model")
+        reload(self.model_mod)
+        self.model = self.model_mod.Model(self.pic)
+        print 'NUM_T',self.model.NUM_T
         self.model_editor.setPlainText(open(self.mfname,'r').read())
         self.model_label.setText(mfname)
 
-    def on_apply_model_clicked(self, checked = None):
+    def on_applyModel_clicked(self, checked = None):
         if checked is not None: return
         print "Save and apply"
-        mcode = unicode(self.model_editor.plainText())
+        mcode = unicode(self.model_editor.toPlainText())
+        print 'Saving to',self.mfname
         f=open(self.mfname,'w')
         f.seek(0)
         f.write(mcode)
@@ -141,8 +144,6 @@ def compare_images_pil(img1, img2):
 compare_images = compare_images_pil
 
 def main():
-    import psyco
-    psyco.full()
     app = QtGui.QApplication(sys.argv)
     window=Main()
     window.show()

@@ -9,7 +9,7 @@ class Model(object):
     to approach a target picture"""
     def __init__(self, target):
         """Init stuff, target is the target image"""
-        self.NUM_T=1000
+        self.NUM_T=50
         self.NUM_M=100
         self.T_W=100
         self.w=target.width()
