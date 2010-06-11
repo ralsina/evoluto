@@ -14,7 +14,7 @@ from PyQt4 import QtCore, QtGui, uic, QtOpenGL
 
 # Create a class for our main window
 class Main(QtGui.QDialog):
-    def __init__(self, image):
+    def __init__(self):
         QtGui.QDialog.__init__(self)
         
         uifile = os.path.join(
@@ -22,27 +22,47 @@ class Main(QtGui.QDialog):
                 os.path.dirname(__file__)),'main.ui')
         uic.loadUi(uifile, self)
 
-        self.pic = QtGui.QPixmap(sys.argv[1])
+        # FIXME: load a sample image
+        self.pic = QtGui.QPixmap(400,400)
+        self.pic.fill(QtGui.QColor(255,255,255))
         self.img = self.pic.toImage()
         self.picture.setPixmap(self.pic)
 
-        self.picture.setFixedSize(self.pic.size())
-        self.view.setFixedSize(self.pic.size())
+        # Load default model
+        mfname = os.path.join(
+            os.path.abspath(
+                os.path.dirname(__file__)),'models','triangles.py')
+        self.on_load_clicked(mfname=mfname)
 
         # Create polygons
         self.model = None
         self.generation = 0
+        self.generation_label.setText(str(self.generation))
 
-    def on_load_clicked(self, checked = None):
+    def on_load_target_clicked(self, checked = None):
+        if checked is not None: return
+        picname = QtGui.QFileDialog.getOpenFileName(self, "select a picture")
+        self.pic = QtGui.QPixmap(picname)
+        self.img = self.pic.toImage()
+        self.picture.setPixmap(self.pic)
+        self.picture.setFixedSize(self.pic.size())
+        self.view.setFixedSize(self.pic.size())
+
+    def on_load_clicked(self, checked = None, mfname=None):
         if checked is not None: return
         models = os.path.join(
             os.path.abspath(
                 os.path.dirname(__file__)),'models')
-        mfname = QtGui.QFileDialog.getOpenFileName(self, "select a model", models)
+        if not mfname:
+            mfname = QtGui.QFileDialog.getOpenFileName(self, "select a model", models)
+        if not mfname:
+            return
+        self.mfname = mfname
         mfname = "models.%s"%(mfname.split(os.sep)[-1][:-3])
         model=__import__(mfname, fromlist="Model")
         print model, mfname
         self.model = model.Model(self.pic)
+        self.model_editor.setPlainText(open(self.mfname,'r').read())
 
     def on_pause_play_clicked(self, checked = None):
         if checked is not None: return
@@ -51,6 +71,7 @@ class Main(QtGui.QDialog):
         
     def drawScene(self):
         self.generation +=1
+        self.generation_label.setText(str(self.generation))
         print 'GEN:', self.generation
         
         # Create scene, assign to view
@@ -109,18 +130,11 @@ def compare_images_pil(img1, img2):
 
 compare_images = compare_images_pil
 
-def compare_images_magick(img1, img2):
-    img1.save('_1.png')
-    img2.save('_2.png')
-    v = os.popen3('compare _1.png _2.png -metric MAE -dissimilarity-threshold 1  diff.png', 'r')[2].read()
-    return float(v.split(' ')[0])
-
-
 def main():
     import psyco
     psyco.full()
     app = QtGui.QApplication(sys.argv)
-    window=Main(sys.argv[1])
+    window=Main()
     window.show()
     
     sys.exit(app.exec_())
