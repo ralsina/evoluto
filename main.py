@@ -60,9 +60,9 @@ class Main(QtGui.QDialog):
         self.mfname = mfname
         mfname = "models.%s"%(mfname.split(os.sep)[-1][:-3])
         model=__import__(mfname, fromlist="Model")
-        print model, mfname
         self.model = model.Model(self.pic)
         self.model_editor.setPlainText(open(self.mfname,'r').read())
+        self.model_label.setText(mfname)
 
     def on_pause_play_clicked(self, checked = None):
         if checked is not None: return
