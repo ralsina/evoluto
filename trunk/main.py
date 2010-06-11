@@ -35,7 +35,6 @@ class Main(QtGui.QDialog):
         self.on_load_clicked(mfname=mfname)
 
         # Create polygons
-        self.model = None
         self.generation = 0
         self.generation_label.setText(str(self.generation))
 
@@ -64,9 +63,20 @@ class Main(QtGui.QDialog):
         self.model_editor.setPlainText(open(self.mfname,'r').read())
         self.model_label.setText(mfname)
 
+    def on_apply_model_clicked(self, checked = None):
+        if checked is not None: return
+        print "Save and apply"
+        mcode = unicode(self.model_editor.plainText())
+        f=open(self.mfname,'w')
+        f.seek(0)
+        f.write(mcode)
+        f.close()
+        self.on_load_clicked(mfname=self.mfname)
+
     def on_pause_play_clicked(self, checked = None):
         if checked is not None: return
         print "Play!"
+        print 'MM', self.model
         self.drawScene()
         
     def drawScene(self):
