@@ -47,6 +47,14 @@ class Main(QtGui.QDialog):
         self.picture.setPixmap(self.pic)
         self.picture.setFixedSize(self.pic.size())
         self.view.setFixedSize(self.pic.size())
+        buffer1 = QtCore.QBuffer()
+        buffer1.open(QtCore.QIODevice.ReadWrite)
+        self.img.save(buffer1, "PNG")
+        strio1 = cStringIO.StringIO()
+        strio1.write(buffer1.data())
+        buffer1.close()
+        strio1.seek(0)
+        self.m1 = numpy.asarray(Image.open(strio1))
 
     def on_load_clicked(self, checked = None, mfname=None):
         if checked is not None: return
@@ -108,24 +116,12 @@ class Main(QtGui.QDialog):
         painter.end()
         if self.generation % 100 == 10:
             self.new.save('%s.png'%self.generation)
-        diff = self.compare_images(self.img, self.new)
+        diff = self.compare_images(self.new)
         self.model.decide(diff)
         QtCore.QTimer.singleShot(100, self.drawScene)
 
-    def compare_images(self, img1, img2):
+    def compare_images(self, img2):
         # Convert images to PIL
-
-        if not self.pil_img1:
-            buffer1 = QtCore.QBuffer()
-            buffer1.open(QtCore.QIODevice.ReadWrite)
-            img1.save(buffer1, "PNG")
-            strio1 = cStringIO.StringIO()
-            strio1.write(buffer1.data())
-            buffer1.close()
-            strio1.seek(0)
-            self.pil_img1 = Image.open(strio1)
-            img = self.pil_img1
-            self.m1 = numpy.asarray(img)
 
         buffer2 = QtCore.QBuffer()
         buffer2.open(QtCore.QIODevice.ReadWrite)
@@ -135,9 +131,7 @@ class Main(QtGui.QDialog):
         buffer2.close()
         self.strio2.seek(0)
         img2 = Image.open(self.strio2)
-
         m2 = numpy.asarray(img2)
-        #s = numpy.sum(numpy.abs(m1-m2))
         s = numpy.linalg.norm(self.m1-m2)
         return s
 
