@@ -124,6 +124,8 @@ class Main(QtGui.QDialog):
             buffer1.close()
             strio1.seek(0)
             self.pil_img1 = Image.open(strio1)
+            img = self.pil_img1
+            self.m1 = numpy.asarray(img)
 
         buffer2 = QtCore.QBuffer()
         buffer2.open(QtCore.QIODevice.ReadWrite)
@@ -134,11 +136,9 @@ class Main(QtGui.QDialog):
         self.strio2.seek(0)
         img2 = Image.open(self.strio2)
 
-        # Compare
-        m1 = numpy.array(self.pil_img1.convert('L'))
-        m2 = numpy.array(img2.convert('L'))
+        m2 = numpy.asarray(img2)
         #s = numpy.sum(numpy.abs(m1-m2))
-        s = numpy.linalg.norm(m1-m2)
+        s = numpy.linalg.norm(self.m1-m2)
         return s
 
 
