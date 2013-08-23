@@ -5,6 +5,7 @@
 import os,sys, random,popen2
 import numpy
 from PIL import Image
+import cStringIO
 
 # Import Qt modules
 from PyQt4 import QtCore, QtGui, uic, QtOpenGL
@@ -16,7 +17,7 @@ from PyQt4 import QtCore, QtGui, uic, QtOpenGL
 class Main(QtGui.QDialog):
     def __init__(self):
         QtGui.QDialog.__init__(self)
-        
+        self.pil_img1 = None
         uifile = os.path.join(
             os.path.abspath(
                 os.path.dirname(__file__)),'main.ui')
@@ -81,12 +82,12 @@ class Main(QtGui.QDialog):
         print "Play!"
         print 'MM', self.model
         self.drawScene()
-        
+
     def drawScene(self):
         self.generation +=1
         self.generation_label.setText(str(self.generation))
         print 'GEN:', self.generation
-        
+
         # Create scene, assign to view
         self.qgscene = QtGui.QGraphicsScene(QtCore.QRectF(0,0,
             self.pic.width(), self.pic.height()))
@@ -107,49 +108,49 @@ class Main(QtGui.QDialog):
         painter.end()
         if self.generation % 100 == 10:
             self.new.save('%s.png'%self.generation)
-        diff = compare_images(self.img, self.new)
+        diff = self.compare_images(self.img, self.new)
         self.model.decide(diff)
         QtCore.QTimer.singleShot(100, self.drawScene)
 
-import cStringIO
+    def compare_images(self, img1, img2):
 
-def compare_images_pil(img1, img2):
+        # Convert images to PIL
 
-    # Convert images to PIL
-    
-    buffer1 = QtCore.QBuffer()
-    buffer1.open(QtCore.QIODevice.ReadWrite)
-    img1.save(buffer1, "PNG")
-    strio1 = cStringIO.StringIO()
-    strio1.write(buffer1.data())
-    buffer1.close()
-    strio1.seek(0)
-    img1 = Image.open(strio1)
-    
-    buffer2 = QtCore.QBuffer()
-    buffer2.open(QtCore.QIODevice.ReadWrite)
-    img2.save(buffer2, "PNG")
-    strio2 = cStringIO.StringIO()
-    strio2.write(buffer2.data())
-    buffer2.close()
-    strio2.seek(0)
-    img2 = Image.open(strio2)
+        if not self.pil_img1:
+            buffer1 = QtCore.QBuffer()
+            buffer1.open(QtCore.QIODevice.ReadWrite)
+            img1.save(buffer1, "PNG")
+            strio1 = cStringIO.StringIO()
+            strio1.write(buffer1.data())
+            buffer1.close()
+            strio1.seek(0)
+            self.pil_img1 = Image.open(strio1)
 
-    # Compare
-    m1 = numpy.array([p[0] for p in img1.getdata()])#.reshape(*img1.size)
-    m2 = numpy.array([p[0] for p in img2.getdata()])#.reshape(*img2.size)
-    s = numpy.sum(numpy.abs(m1-m2))
-    return s
+        buffer2 = QtCore.QBuffer()
+        buffer2.open(QtCore.QIODevice.ReadWrite)
+        img2.save(buffer2, "PNG")
+        strio2 = cStringIO.StringIO()
+        strio2.write(buffer2.data())
+        buffer2.close()
+        strio2.seek(0)
+        img2 = Image.open(strio2)
 
-compare_images = compare_images_pil
+        # Compare
+        m1 = numpy.array([p[0] for p in self.pil_img1.getdata()])#.reshape(*img1.size)
+        m2 = numpy.array([p[0] for p in img2.getdata()])#.reshape(*img2.size)
+        s = numpy.sum(numpy.abs(m1-m2))
+        return s
+
+
+
 
 def main():
     app = QtGui.QApplication(sys.argv)
     window=Main()
     window.show()
-    
+
     sys.exit(app.exec_())
 
 if __name__ == "__main__":
     main()
-    
+
