@@ -17,23 +17,23 @@
    <item>
     <widget class="QTabWidget" name="tabWidget">
      <property name="currentIndex">
-      <number>2</number>
+      <number>0</number>
      </property>
      <widget class="QWidget" name="Current">
       <attribute name="title">
        <string>Current</string>
       </attribute>
-      <layout class="QVBoxLayout" name="verticalLayout_2">
+      <layout class="QHBoxLayout" name="horizontalLayout_6">
        <item>
-        <widget class="QGraphicsView" name="view"/>
+        <widget class="QGraphicsView" name="view">
+         <property name="verticalScrollBarPolicy">
+          <enum>Qt::ScrollBarAlwaysOff</enum>
+         </property>
+         <property name="horizontalScrollBarPolicy">
+          <enum>Qt::ScrollBarAlwaysOff</enum>
+         </property>
+        </widget>
        </item>
-      </layout>
-     </widget>
-     <widget class="QWidget" name="Target">
-      <attribute name="title">
-       <string>Target</string>
-      </attribute>
-      <layout class="QVBoxLayout" name="verticalLayout">
        <item>
         <widget class="QLabel" name="picture">
          <property name="text">
