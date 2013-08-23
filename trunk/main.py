@@ -113,7 +113,6 @@ class Main(QtGui.QDialog):
         QtCore.QTimer.singleShot(100, self.drawScene)
 
     def compare_images(self, img1, img2):
-
         # Convert images to PIL
 
         if not self.pil_img1:
@@ -129,16 +128,17 @@ class Main(QtGui.QDialog):
         buffer2 = QtCore.QBuffer()
         buffer2.open(QtCore.QIODevice.ReadWrite)
         img2.save(buffer2, "PNG")
-        strio2 = cStringIO.StringIO()
-        strio2.write(buffer2.data())
+        self.strio2 = cStringIO.StringIO()
+        self.strio2.write(buffer2.data())
         buffer2.close()
-        strio2.seek(0)
-        img2 = Image.open(strio2)
+        self.strio2.seek(0)
+        img2 = Image.open(self.strio2)
 
         # Compare
-        m1 = numpy.array([p[0] for p in self.pil_img1.getdata()])#.reshape(*img1.size)
-        m2 = numpy.array([p[0] for p in img2.getdata()])#.reshape(*img2.size)
-        s = numpy.sum(numpy.abs(m1-m2))
+        m1 = numpy.array(self.pil_img1.convert('L'))
+        m2 = numpy.array(img2.convert('L'))
+        #s = numpy.sum(numpy.abs(m1-m2))
+        s = numpy.linalg.norm(m1-m2)
         return s
 
 
